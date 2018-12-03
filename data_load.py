@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-#/usr/bin/python2
-'''
+# /usr/bin/python3.6
+"""
 November 2018 by Linqing Chen.
 linqingchen6@126.com
 https://github.com/LinqingChen/transformer-SimplifiedVersion
-'''
+"""
 from __future__ import print_function
 from hyperparams import Hyperparams as hp
 import tensorflow as tf
@@ -12,17 +12,20 @@ import numpy as np
 import codecs
 import regex
 
+
 def load_de_vocab():
     vocab = [line.split()[0] for line in codecs.open('preprocessed/de.vocab.tsv', 'r', 'utf-8').read().splitlines() if int(line.split()[1])>=hp.min_cnt]
     word2idx = {word: idx for idx, word in enumerate(vocab)}
     idx2word = {idx: word for idx, word in enumerate(vocab)}
     return word2idx, idx2word
 
+
 def load_en_vocab():
     vocab = [line.split()[0] for line in codecs.open('preprocessed/en.vocab.tsv', 'r', 'utf-8').read().splitlines() if int(line.split()[1])>=hp.min_cnt]
     word2idx = {word: idx for idx, word in enumerate(vocab)}
     idx2word = {idx: word for idx, word in enumerate(vocab)}
     return word2idx, idx2word
+
 
 def create_data(source_sents, target_sents): 
     de2idx, idx2de = load_de_vocab()
@@ -48,6 +51,7 @@ def create_data(source_sents, target_sents):
     
     return X, Y, Sources, Targets
 
+
 def load_train_data():
     de_sen = codecs.open(hp.source_train, 'r', 'utf-8').read().split("\n")
     de_sents = [regex.sub("[^\s\p{Latin}']", "", line) for line in de_sen if line and line[0] != "<"]
@@ -56,7 +60,8 @@ def load_train_data():
     
     X, Y, Sources, Targets = create_data(de_sents, en_sents)
     return X, Y
-    
+
+
 def load_test_data():
     def _refine(line):
         line = regex.sub("<[^>]+>", "", line)
@@ -68,6 +73,7 @@ def load_test_data():
         
     X, Y, Sources, Targets = create_data(de_sents, en_sents)
     return X, Sources, Targets # (1064, 150)
+
 
 def get_batch_data():
     # Load data
@@ -85,11 +91,11 @@ def get_batch_data():
             
     # create batch queues
     x, y = tf.train.shuffle_batch(input_queues,
-                                num_threads=8,
-                                batch_size=hp.batch_size, 
-                                capacity=hp.batch_size*64,   
-                                min_after_dequeue=hp.batch_size*32, 
-                                allow_smaller_final_batch=False)
+                                  num_threads=8,
+                                  batch_size=hp.batch_size,
+                                  capacity=hp.batch_size*64,
+                                  min_after_dequeue=hp.batch_size*32,
+                                  allow_smaller_final_batch=False)
     
     return x, y, num_batch # (N, T), (N, T), ()
 
